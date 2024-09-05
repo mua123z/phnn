@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<!-- saved from url=(0032)http://127.0.0.1:5502/index.html -->
+<html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Selection</title>
+    
+</head>
+<body>
+    <textarea name="text" id="input"></textarea>
+<button id="phnn">phnn</button>
+<label for="voiceList">Chọn ngôn ngữ</label>
+<select id="voiceList"><option value="detect"></option><option value="Microsoft David - English (United States)" data-lang="en-US">Microsoft David - English (United States) (en-US)</option><option value="Microsoft Mark - English (United States)" data-lang="en-US">Microsoft Mark - English (United States) (en-US)</option><option value="Microsoft Zira - English (United States)" data-lang="en-US">Microsoft Zira - English (United States) (en-US)</option><option value="Microsoft An - Vietnamese (Vietnam)" data-lang="vi-VN">Microsoft An - Vietnamese (Vietnam) (vi-VN)</option><option value="Google Deutsch" data-lang="de-DE">Google Deutsch (de-DE)</option><option value="Google US English" data-lang="en-US">Google US English (en-US)</option><option value="Google UK English Female" data-lang="en-GB">Google UK English Female (en-GB)</option><option value="Google UK English Male" data-lang="en-GB">Google UK English Male (en-GB)</option><option value="Google español" data-lang="es-ES">Google español (es-ES)</option><option value="Google español de Estados Unidos" data-lang="es-US">Google español de Estados Unidos (es-US)</option><option value="Google français" data-lang="fr-FR">Google français (fr-FR)</option><option value="Google हिन्दी" data-lang="hi-IN">Google हिन्दी (hi-IN)</option><option value="Google Bahasa Indonesia" data-lang="id-ID">Google Bahasa Indonesia (id-ID)</option><option value="Google italiano" data-lang="it-IT">Google italiano (it-IT)</option><option value="Google 日本語" data-lang="ja-JP">Google 日本語 (ja-JP)</option><option value="Google 한국의" data-lang="ko-KR">Google 한국의 (ko-KR)</option><option value="Google Nederlands" data-lang="nl-NL">Google Nederlands (nl-NL)</option><option value="Google polski" data-lang="pl-PL">Google polski (pl-PL)</option><option value="Google português do Brasil" data-lang="pt-BR">Google português do Brasil (pt-BR)</option><option value="Google русский" data-lang="ru-RU">Google русский (ru-RU)</option><option value="Google 普通话（中国大陆）" data-lang="zh-CN">Google&nbsp;普通话（中国大陆） (zh-CN)</option><option value="Google 粤語（香港）" data-lang="zh-HK">Google&nbsp;粤語（香港） (zh-HK)</option><option value="Google 國語（臺灣）" data-lang="zh-TW">Google 國語（臺灣） (zh-TW)</option></select>
+
+<script>
+let synth = speechSynthesis;
+const voiceList = document.getElementById("voiceList");
+const detectBtn = document.getElementById("phnn");
+
+function populateVoices() {
+    const voices = synth.getVoices();
+    if (voices.length === 0) {
+        synth.onvoiceschanged = populateVoices;
+    } else {
+        voiceList.innerHTML = '<option value="detect"></option>';
+
+        voices.forEach(voice => {
+            let option = `<option value="${voice.name}" data-lang="${voice.lang}">${voice.name} (${voice.lang})</option>`;
+            voiceList.insertAdjacentHTML("beforeend", option);
+        });
+    }
+}
+
+// Hàm phát hiện ngôn ngữ và chọn giọng nói tương ứng
+async function detectLanguageAndSetVoice() {
+    let input = document.getElementById("input").value;
+
+    // Sử dụng API phát hiện ngôn ngữ (ví dụ với DetectLanguage API)
+    let detectedLang = await detectLanguage(input); // Trả về mã ngôn ngữ, ví dụ "en"
+
+    // Duyệt qua các tùy chọn trong danh sách giọng nói
+    let found = false;
+    for (let i = 0; i < voiceList.options.length; i++) {
+        let option = voiceList.options[i];
+        if (option.dataset.lang && option.dataset.lang.startsWith(detectedLang)) {
+            voiceList.value = option.value;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        alert("Không tìm thấy giọng nói phù hợp với ngôn ngữ phát hiện.");
+    }
+}
+
+// Gọi hàm khi trang được tải
+populateVoices();
+
+// Lắng nghe sự kiện click của nút "phnn"
+detectBtn.addEventListener("click", function() {
+    detectLanguageAndSetVoice();
+});
+
+// hàm phát hiện ngôn ngữ bằng DetectLanguage API
+async function detectLanguage(text) {
+    const apiKey = '6f9ef020503388dad3597383c1c7e640';
+    const url = `https://ws.detectlanguage.com/0.2/detect?key=${apiKey}`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ q: text })
+    });
+
+    const data = await response.json();
+    return data.data.detections[0].language;
+}
+</script>
+
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+
+
+</body></html>
